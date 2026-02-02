@@ -62,15 +62,15 @@ pipeline{
         //             dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
         //         }
         //     }
-       //  }
+        // }
 
-        stage('TRIVY FS SCAN') {
-            steps {
-                dir('Application-Code') {
-                    sh "trivy fs . > trivyfs.txt"
-                }
-            }
-        }
+       //  stage('TRIVY FS SCAN') {
+       //      steps {
+       //          dir('Application-Code') {
+       //              sh "trivy fs . > trivyfs.txt"
+       //          }
+       //      }
+       //  }
 
         stage("Docker Image Build"){
             steps{
