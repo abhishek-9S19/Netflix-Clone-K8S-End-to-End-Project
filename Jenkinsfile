@@ -13,13 +13,6 @@ pipeline {
             }
         }
 
-        stage('Checkout from Git') {
-            steps {
-                git branch: 'master',
-                    url: 'https://github.com/abhishek-9S19/Netflix-Clone-K8S-End-to-End-Project.git'
-            }
-        }
-
         stage('Install Dependencies') {
             steps {
                 dir('Application-Code') {
