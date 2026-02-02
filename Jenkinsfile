@@ -28,45 +28,6 @@ pipeline {
             }
         }
 
-        /* ===========================
-           SonarQube (DISABLED)
-        ============================
-
-        stage("SonarQube Analysis") {
-            steps {
-                ...
-            }
-        }
-
-        stage("Quality Gate") {
-            steps {
-                ...
-            }
-        }
-        */
-
-        /* ===========================
-           OWASP Dependency Check (DISABLED)
-        ============================
-
-        stage('OWASP Dependency Check') {
-            steps {
-                ...
-            }
-        }
-        */
-
-        /* ===========================
-           Trivy FS Scan (DISABLED)
-        ============================
-
-        stage('TRIVY FS SCAN') {
-            steps {
-                ...
-            }
-        }
-        */
-
         stage('Docker Image Build') {
             steps {
                 dir('Application-Code') {
@@ -114,15 +75,5 @@ pipeline {
             }
         }
     }
-
-    /* ===========================
-       Slack Notifications (DISABLED)
-    ============================
-
-    post {
-        always {
-            slackSend(...)
-        }
-    }
-    */
 }
+
