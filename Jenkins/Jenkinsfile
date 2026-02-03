@@ -12,14 +12,14 @@ pipeline {
                 deleteDir()
             }
         }
-
-        stage('Install Dependencies') {
-            steps {
-                dir('Application-Code') {
-                    sh 'npm install'
-                }
-            }
-        }
+ 
+ //       stage('Install Dependencies') {
+ //           steps {
+ //               dir('Application-Code') {
+ //                   sh 'npm install'
+ //               }
+ //           }
+ //       }
 
         stage('Docker Image Build') {
             steps {
