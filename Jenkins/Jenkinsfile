@@ -1,31 +1,15 @@
-pipeline{
+pipeline {
     agent any
-    tools{
+
+    tools {
         nodejs 'nodejs'
     }
 
-    // ❌ SonarQube tool not configured yet
-    // environment {
-    //     SCANNER_HOME=tool 'sonar-server'
-    // }
-
     stages {
-        stage('FINGERPRINT') {
+
+        stage('Workspace Cleaning') {
             steps {
-                echo 'USING UPDATED JENKINSFILE - NO CHECKOUT STAGE'
-            }
-        }
-
-
-        stage('Workspace Cleaning'){
-            steps{
                 deleteDir()
-            }
-        }
-
-        stage('Checkout from Git'){
-            steps{
-                git branch: 'master', url: 'https://github.com/AmanPathak-DevOps/Netflix-Clone-K8S-End-to-End-Project.git'
             }
         }
 
@@ -37,126 +21,52 @@ pipeline{
             }
         }
 
-        // ❌ SonarQube not ready yet
-        // stage("SonarQube Analysis") {
-        //     steps {
-        //         dir('Application-Code') {
-        //             withSonarQubeEnv('sonar-server') {
-        //                 sh '''
-        //                 npx @sonar/scan \
-        //                 -Dsonar.projectKey=NetflixClone \
-        //                 -Dsonar.projectName=NetflixClone \
-        //                 -Dsonar.sources=src
-        //                 '''
-        //             }
-        //         }
-        //     }
-        // }
-
-        // ❌ Quality Gate depends on SonarQube
-        // stage("Quality Gate") {
-        //     steps {
-        //         script {
-        //             waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
-        //         }
-        //     }
-        // }
-
-        // stage('OWASP Dependency Check') {
-        //     steps {
-        //         dir('Application-Code') {
-        //             dependencyCheck additionalArguments: '--scan ./ --format XML --out .', odcInstallation: 'owasp-dp-check'
-        //             dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-        //         }
-        //     }
-        // }
-
-       //  stage('TRIVY FS SCAN') {
-       //      steps {
-       //          dir('Application-Code') {
-       //              sh "trivy fs . > trivyfs.txt"
-       //          }
-       //      }
-       //  }
-
-        stage("Docker Image Build"){
-            steps{
+        stage('Docker Image Build') {
+            steps {
                 dir('Application-Code') {
-                    script{
-                        withDockerRegistry(credentialsId: 'dockerhub-creds', toolName: 'docker'){
-                            withCredentials([string(credentialsId: 'tmdb-api', variable: 'TMDB_API_KEY')]) {
-                                sh """
-                                docker build \
-                                --build-arg TMDB_V3_API_KEY=${TMDB_API_KEY} \
-                                -t abhishekdocker0118/netflix-clone:latest .
-                                """
-                            }
+                    withDockerRegistry(credentialsId: 'dockerhub-creds', toolName: 'docker') {
+                        withCredentials([string(credentialsId: 'tmdb-api', variable: 'TMDB_API_KEY')]) {
+                            sh """
+                            docker build \
+                              --build-arg TMDB_V3_API_KEY=${TMDB_API_KEY} \
+                              -t abhishekdocker0118/netflix-clone:latest .
+                            """
                         }
                     }
                 }
             }
         }
 
-        stage("Docker Image Pushing"){
-            steps{
-                script{
-                    withDockerRegistry(credentialsId: 'dockerhub-creds', toolName: 'docker'){
-                        sh "docker push abhishekdocker0118/netflix-clone:latest"
-                    }
+        stage('Docker Image Push') {
+            steps {
+                withDockerRegistry(credentialsId: 'dockerhub-creds', toolName: 'docker') {
+                    sh 'docker push abhishekdocker0118/netflix-clone:latest'
                 }
             }
         }
 
-      //  stage("TRIVY Image Scan"){
-      //      steps{
-      //          sh "trivy image abhishekdocker0118/netflix-clone:latest > trivyimage.txt"
-      //      }
-      //  }
+        stage('TRIVY Image Scan') {
+            steps {
+                sh '''
+                docker run --rm \
+                  -v /var/run/docker.sock:/var/run/docker.sock \
+                  aquasec/trivy:latest image \
+                  --exit-code 0 \
+                  --no-progress \
+                  abhishekdocker0118/netflix-clone:latest
+                '''
+            }
+        }
 
-          stage('TRIVY Image Scan') {
-              steps {
-                  sh '''
-                  docker run --rm \
-                    -v /var/run/docker.sock:/var/run/docker.sock \
-                    aquasec/trivy:latest image \
-                    --exit-code 0 \
-                    --no-progress \
-                    abhishekdocker0118/netflix-clone:latest
-                  '''
-               }
-           }
-          
-          stage('Deploy to Kubernetes') {
-              steps {
-                  dir('Kubernetes') {
-                      sh 'kubectl apply -f deployment.yml --validate=false'
-                      sh 'kubectl apply -f service.yml --validate=false'
-                      sh 'kubectl get svc'
-                  }
-              }
-          }
-
-   
-
-    //    stage('Deploy to Kubernetes') {
-    //        steps {
-    //            dir('Kubernetes') {
-    //                sh 'kubectl apply -f deployment.yml'
-    //                sh 'kubectl apply -f service.yml'
-    //                sh 'kubectl get svc'
-    //            }
-    //        }
-    //    }
-    // }
-
-    // ❌ Slack plugin not installed
-    // post {
-    //     always {
-    //         slackSend(
-    //             channel: '#devops-alerts',
-    //             message: "Build ${currentBuild.result}"
-    //         )
-    //     }
-    // }
+        stage('Deploy to Kubernetes') {
+            steps {
+                dir('Kubernetes') {
+                    sh 'kubectl apply -f deployment.yml --validate=false'
+                    sh 'kubectl apply -f service.yml --validate=false'
+                    sh 'kubectl get svc'
+                }
+            }
+        }
+    }
 }
 
