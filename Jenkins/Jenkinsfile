@@ -7,11 +7,11 @@ pipeline {
 
     stages {
 
-        stage('Workspace Cleaning') {
-            steps {
-                deleteDir()
-            }
-        }
+//        stage('Workspace Cleaning') {
+//            steps {
+//                deleteDir()
+//            }
+//        }
  
  //       stage('Install Dependencies') {
  //           steps {
