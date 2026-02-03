@@ -24,7 +24,7 @@ pipeline {
         stage('Docker Image Build') {
             steps {
                 dir('Application-Code') {
-                    withDockerRegistry(credentialsId: 'dockerhub-creds', toolName: 'docker') {
+                    withDockerRegistry(credentialsId: 'dockerhub-creds') {
                         withCredentials([string(credentialsId: 'tmdb-api', variable: 'TMDB_API_KEY')]) {
                             sh """
                             docker build \
@@ -39,7 +39,7 @@ pipeline {
 
         stage('Docker Image Push') {
             steps {
-                withDockerRegistry(credentialsId: 'dockerhub-creds', toolName: 'docker') {
+                withDockerRegistry(credentialsId: 'dockerhub-creds') {
                     sh 'docker push abhishekdocker0118/netflix-clone:latest'
                 }
             }
