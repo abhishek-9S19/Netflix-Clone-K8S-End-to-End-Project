@@ -10,6 +10,13 @@ pipeline{
     // }
 
     stages {
+        stage('FINGERPRINT') {
+            steps {
+                echo 'USING UPDATED JENKINSFILE - NO CHECKOUT STAGE'
+            }
+        }
+
+
         stage('Workspace Cleaning'){
             steps{
                 deleteDir()
