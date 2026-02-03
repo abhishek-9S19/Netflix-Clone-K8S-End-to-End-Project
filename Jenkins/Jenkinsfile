@@ -107,11 +107,25 @@ pipeline{
             }
         }
 
-        stage("TRIVY Image Scan"){
-            steps{
-                sh "trivy image abhishekdocker0118/netflix-clone:latest > trivyimage.txt"
-            }
-        }
+      //  stage("TRIVY Image Scan"){
+      //      steps{
+      //          sh "trivy image abhishekdocker0118/netflix-clone:latest > trivyimage.txt"
+      //      }
+      //  }
+
+          stage('TRIVY Image Scan') {
+              steps {
+                  sh '''
+                  docker run --rm \
+                    -v /var/run/docker.sock:/var/run/docker.sock \
+                    aquasec/trivy:latest image \
+                    --exit-code 0 \
+                    --no-progress \
+                    abhishekdocker0118/netflix-clone:latest
+                  '''
+               }
+           }
+   
 
         stage('Deploy to Kubernetes') {
             steps {
