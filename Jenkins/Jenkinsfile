@@ -68,14 +68,14 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                withKubeConfig(credentialsId: 'k8s-kubeconfig') {
-                    sh 'kubectl get nodes'
-                    sh 'kubectl apply -f Kubernetes/deployment.yml'
-                    sh 'kubectl apply -f Kubernetes/service.yml'
-                    sh 'kubectl get svc'
-                }
+                sh 'kubectl get nodes'
+                sh 'kubectl apply -f Kubernetes/deployment.yml'
+                sh 'kubectl apply -f Kubernetes/service.yml'
+                sh 'kubectl get svc'
             }
         }
+
+
     }
 }
 
