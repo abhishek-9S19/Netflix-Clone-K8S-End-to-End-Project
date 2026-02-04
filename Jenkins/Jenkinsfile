@@ -24,8 +24,13 @@ pipeline {
         stage('Docker Build') {
             steps {
                 dir('Application-Code') {
-                    withDockerRegistry(credentialsId: 'dockerhub-creds', url: 'https://index.docker.io/v1/') {
-                        withCredentials([string(credentialsId: 'tmdb-api', variable: 'TMDB_API_KEY')]) {
+                    withDockerRegistry(
+                        credentialsId: 'dockerhub-creds',
+                        url: 'https://index.docker.io/v1/'
+                    ) {
+                        withCredentials([
+                            string(credentialsId: 'tmdb-api', variable: 'TMDB_API_KEY')
+                        ]) {
                             sh """
                             docker build \
                               --build-arg TMDB_V3_API_KEY=${TMDB_API_KEY} \
@@ -39,7 +44,10 @@ pipeline {
 
         stage('Docker Push') {
             steps {
-                withDockerRegistry(credentialsId: 'dockerhub-creds', url: 'https://index.docker.io/v1/') {
+                withDockerRegistry(
+                    credentialsId: 'dockerhub-creds',
+                    url: 'https://index.docker.io/v1/'
+                ) {
                     sh 'docker push abhishekdocker0118/netflix-clone:latest'
                 }
             }
@@ -55,6 +63,17 @@ pipeline {
                   --no-progress \
                   abhishekdocker0118/netflix-clone:latest
                 '''
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                withKubeConfig(credentialsId: 'k8s-kubeconfig') {
+                    sh 'kubectl get nodes'
+                    sh 'kubectl apply -f Kubernetes/deployment.yml'
+                    sh 'kubectl apply -f Kubernetes/service.yml'
+                    sh 'kubectl get svc'
+                }
             }
         }
     }
